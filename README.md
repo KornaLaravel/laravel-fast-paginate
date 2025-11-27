@@ -34,7 +34,7 @@ sure to test on your data!
 
 ## Installation
 
-This package supports Laravel 10, 11, and 12.
+This package supports Laravel 10, 11, and 12, and requires PHP 8.2 or higher.
 
 To install, require the package via composer:
 

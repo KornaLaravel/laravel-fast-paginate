@@ -7,10 +7,11 @@
 namespace AaronFrancis\FastPaginate\Tests\Integration;
 
 use AaronFrancis\FastPaginate\Tests\Support\User;
+use PHPUnit\Framework\Attributes\Test;
 
 class RelationTest extends Base
 {
-    /** @test */
+    #[Test]
     public function basic_test()
     {
         $user = User::first();
@@ -24,7 +25,7 @@ class RelationTest extends Base
         );
     }
 
-    /** @test */
+    #[Test]
     public function belongs_to_many_test()
     {
         $user = User::first();
@@ -42,7 +43,7 @@ class RelationTest extends Base
         );
     }
 
-    /** @test */
+    #[Test]
     public function belongs_to_many_add_select_alias_test()
     {
         $user = User::first();
@@ -64,7 +65,7 @@ class RelationTest extends Base
         );
     }
 
-    /** @test */
+    #[Test]
     public function belongs_to_many_order_by_alias_test()
     {
         $user = User::first();
@@ -86,7 +87,7 @@ class RelationTest extends Base
         );
     }
 
-    /** @test */
+    #[Test]
     public function belongs_to_many_hydrating_pivot_test()
     {
         $user = User::first();

@@ -347,7 +347,7 @@ class BuilderTest extends Base
 
         $this->assertCount(3, $queries);
         $this->assertEquals(
-            'select * from `notifications` where `notifications`.`id` in (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) limit 16 offset 0',
+            'select * from `notifications` where `notifications`.`id` in (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) order by `notifications`.`id` asc limit 16 offset 0',
             $queries[2]['query']
         );
 

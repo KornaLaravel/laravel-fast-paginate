@@ -38,7 +38,7 @@ class BuilderTest extends Base
         $this->assertCount(3, $queries);
 
         $this->assertEquals(
-            'select * from `users` where `users`.`id` in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15) limit 16 offset 0',
+            'select * from `users` where `users`.`id` in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15) order by `users`.`id` asc limit 16 offset 0',
             $queries[2]['query']
         );
 
@@ -58,7 +58,7 @@ class BuilderTest extends Base
         $this->assertEquals(5, $results->count());
 
         $this->assertEquals(
-            'select * from `users` where `users`.`id` in (1, 2, 3, 4, 5) limit 6 offset 0',
+            'select * from `users` where `users`.`id` in (1, 2, 3, 4, 5) order by `users`.`id` asc limit 6 offset 0',
             $queries[2]['query']
         );
 
@@ -78,7 +78,7 @@ class BuilderTest extends Base
         $this->assertEquals(5, $results->count());
 
         $this->assertEquals(
-            'select * from `users` where `users`.`id` in (6, 7, 8, 9, 10) limit 6 offset 0',
+            'select * from `users` where `users`.`id` in (6, 7, 8, 9, 10) order by `users`.`id` asc limit 6 offset 0',
             $queries[2]['query']
         );
 
@@ -98,7 +98,7 @@ class BuilderTest extends Base
         $this->assertEquals(5, $results->count());
 
         $this->assertEquals(
-            'select * from `users` where `users`.`id` in (1, 2, 3, 4, 5) limit 6 offset 0',
+            'select * from `users` where `users`.`id` in (1, 2, 3, 4, 5) order by `users`.`id` asc limit 6 offset 0',
             $queries[2]['query']
         );
     }
@@ -114,7 +114,7 @@ class BuilderTest extends Base
         $this->assertEquals(2, $results->count());
 
         $this->assertEquals(
-            'select * from `users` where `users`.`id` in (1, 2) limit 3 offset 0',
+            'select * from `users` where `users`.`id` in (1, 2) order by `users`.`id` asc limit 3 offset 0',
             $queries[2]['query']
         );
 
@@ -148,6 +148,26 @@ class BuilderTest extends Base
         $this->expectExceptionMessage("Base table or view not found: 1146 Table 'fast_paginate.custom_table'");
 
         UserCustomTable::query()->fastPaginate();
+    }
+
+    #[Test]
+    public function default_order_by_primary_key_when_no_order_specified()
+    {
+        $queries = $this->withQueriesLogged(function () use (&$results) {
+            $results = User::query()->fastPaginate(5);
+        });
+
+        // Inner query should have order by primary key to ensure deterministic results
+        $this->assertEquals(
+            'select `users`.`id` from `users` order by `users`.`id` asc limit 5 offset 0',
+            $queries[1]['query']
+        );
+
+        // Outer query should also preserve the order
+        $this->assertEquals(
+            'select * from `users` where `users`.`id` in (1, 2, 3, 4, 5) order by `users`.`id` asc limit 6 offset 0',
+            $queries[2]['query']
+        );
     }
 
     #[Test]
@@ -211,15 +231,15 @@ class BuilderTest extends Base
             $results = User::query()->selectRaw('(select 1 as complicated_subquery)')->fastPaginate();
         });
 
-        // Dropped for our inner query
+        // Dropped for our inner query (default order by primary key is added)
         $this->assertEquals(
-            'select `users`.`id` from `users` limit 15 offset 0',
+            'select `users`.`id` from `users` order by `users`.`id` asc limit 15 offset 0',
             $queries[1]['query']
         );
 
-        // Restored for the user's query
+        // Restored for the user's query (with default order)
         $this->assertEquals(
-            'select (select 1 as complicated_subquery) from `users` where `users`.`id` in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15) limit 16 offset 0',
+            'select (select 1 as complicated_subquery) from `users` where `users`.`id` in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15) order by `users`.`id` asc limit 16 offset 0',
             $queries[2]['query']
         );
     }
@@ -363,7 +383,7 @@ class BuilderTest extends Base
         $this->assertCount(2, $queries);
 
         $this->assertEquals(
-            'select * from `users` where `users`.`id` in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15) limit 16 offset 0',
+            'select * from `users` where `users`.`id` in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15) order by `users`.`id` asc limit 16 offset 0',
             $queries[1]['query']
         );
 
@@ -385,7 +405,7 @@ class BuilderTest extends Base
         $this->assertCount(2, $queries);
 
         $this->assertEquals(
-            'select * from `users` where `users`.`id` in (6, 7, 8, 9, 10) limit 6 offset 0',
+            'select * from `users` where `users`.`id` in (6, 7, 8, 9, 10) order by `users`.`id` asc limit 6 offset 0',
             $queries[1]['query']
         );
 
@@ -407,7 +427,7 @@ class BuilderTest extends Base
         $this->assertCount(3, $queries);
 
         $this->assertEquals(
-            'select * from `posts` where `posts`.`user_id` = ? and `posts`.`user_id` is not null and `posts`.`id` in (1) limit 16 offset 0',
+            'select * from `posts` where `posts`.`user_id` = ? and `posts`.`user_id` is not null and `posts`.`id` in (1) order by `posts`.`id` asc limit 16 offset 0',
             $queries[2]['query']
         );
 

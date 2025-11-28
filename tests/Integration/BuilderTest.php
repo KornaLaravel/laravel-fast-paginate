@@ -88,6 +88,25 @@ class BuilderTest extends Base
     }
 
     #[Test]
+    public function total_can_be_passed_to_skip_count_query()
+    {
+        $queries = $this->withQueriesLogged(function () use (&$results) {
+            // Pass a custom total to skip the COUNT(*) query
+            $results = User::query()->fastPaginate(5, ['*'], 'page', 1, 100);
+        });
+
+        /** @var \Illuminate\Pagination\LengthAwarePaginator $results */
+        $this->assertEquals(5, $results->count());
+
+        // Should only be 2 queries (inner select + outer select), no COUNT query
+        $this->assertCount(2, $queries);
+
+        // The total should be the custom value we passed
+        $this->assertEquals(100, $results->total());
+        $this->assertTrue($results->hasMorePages());
+    }
+
+    #[Test]
     public function pk_attribute_mutations_are_skipped()
     {
         $queries = $this->withQueriesLogged(function () use (&$results) {

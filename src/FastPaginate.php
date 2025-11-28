@@ -38,7 +38,7 @@ class FastPaginate
 
     protected function paginate(string $paginationMethod, Closure $paginatorOutput)
     {
-        return function ($perPage = null, $columns = ['*'], $pageName = 'page', $page = null) use (
+        return function ($perPage = null, $columns = ['*'], $pageName = 'page', $page = null, $total = null) use (
             $paginationMethod,
             $paginatorOutput
         ) {
@@ -48,7 +48,7 @@ class FastPaginate
             // we are counting on each row of the inner query to return a primary key
             // that we can use. When grouping, that's not always the case.
             if (filled($base->havings) || filled($base->groups) || filled($base->unions)) {
-                return $this->{$paginationMethod}($perPage, $columns, $pageName, $page);
+                return $this->{$paginationMethod}($perPage, $columns, $pageName, $page, $total);
             }
 
             $model = $this->newModelInstance();
@@ -60,13 +60,13 @@ class FastPaginate
             // fast pagination, we'll just return the normal paginator in that case.
             // https://github.com/aarondfrancis/fast-paginate/issues/39
             if ($perPage === -1) {
-                return $this->{$paginationMethod}($perPage, $columns, $pageName, $page);
+                return $this->{$paginationMethod}($perPage, $columns, $pageName, $page, $total);
             }
 
             try {
                 $innerSelectColumns = FastPaginate::getInnerSelectColumns($this);
             } catch (QueryIncompatibleWithFastPagination $e) {
-                return $this->{$paginationMethod}($perPage, $columns, $pageName, $page);
+                return $this->{$paginationMethod}($perPage, $columns, $pageName, $page, $total);
             }
 
             // If no order is specified, we need to add a default order by
@@ -87,7 +87,7 @@ class FastPaginate
                 // remain on the query that actually gets the records.
                 // (withoutEagerLoads not available on Laravel 8.)
                 ->setEagerLoads([])
-                ->{$paginationMethod}($perPage, ['*'], $pageName, $page);
+                ->{$paginationMethod}($perPage, ['*'], $pageName, $page, $total);
 
             // Get the key values from the records on the current page without mutating them.
             $ids = $paginator->getCollection()->map->getRawOriginal($key)->toArray();

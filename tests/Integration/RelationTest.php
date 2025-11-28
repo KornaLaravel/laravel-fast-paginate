@@ -20,7 +20,7 @@ class RelationTest extends Base
         });
 
         $this->assertEquals(
-            'select * from `posts` where `posts`.`user_id` = ? and `posts`.`user_id` is not null and `posts`.`id` in (1) limit 16 offset 0',
+            'select * from `posts` where `posts`.`user_id` = ? and `posts`.`user_id` is not null and `posts`.`id` in (1) order by `posts`.`id` asc limit 16 offset 0',
             $queries[2]['query']
         );
     }

@@ -69,6 +69,14 @@ class FastPaginate
                 return $this->{$paginationMethod}($perPage, $columns, $pageName, $page);
             }
 
+            // If no order is specified, we need to add a default order by
+            // primary key to ensure deterministic results. Without this,
+            // MySQL may return rows in an unpredictable order.
+            // https://github.com/aarondfrancis/fast-paginate/issues/73
+            if (empty($base->orders)) {
+                $this->orderBy("$table.$key");
+            }
+
             // This is the copy of the query that becomes
             // the inner query that selects keys only.
             $paginator = $this->clone()

@@ -14,8 +14,10 @@ class FastPaginate
     /**
      * Laravel 11+ added a $total parameter to paginate(). We need to
      * conditionally pass it to avoid errors on Laravel 10.
+     *
+     * @internal
      */
-    protected static function callPaginator($builder, string $method, $perPage, $columns, $pageName, $page, $total)
+    public static function callPaginator($builder, string $method, $perPage, $columns, $pageName, $page, $total)
     {
         if (version_compare(app()->version(), '11.0.0', '>=')) {
             return $builder->{$method}($perPage, $columns, $pageName, $page, $total);

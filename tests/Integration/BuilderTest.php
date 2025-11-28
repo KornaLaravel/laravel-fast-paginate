@@ -98,12 +98,16 @@ class BuilderTest extends Base
         /** @var \Illuminate\Pagination\LengthAwarePaginator $results */
         $this->assertEquals(5, $results->count());
 
-        // Should only be 2 queries (inner select + outer select), no COUNT query
-        $this->assertCount(2, $queries);
+        // The $total parameter was added in Laravel 11. On Laravel 10,
+        // we can't pass it through, so the COUNT query still runs.
+        if (version_compare(app()->version(), '11.0.0', '>=')) {
+            // Should only be 2 queries (inner select + outer select), no COUNT query
+            $this->assertCount(2, $queries);
 
-        // The total should be the custom value we passed
-        $this->assertEquals(100, $results->total());
-        $this->assertTrue($results->hasMorePages());
+            // The total should be the custom value we passed
+            $this->assertEquals(100, $results->total());
+            $this->assertTrue($results->hasMorePages());
+        }
     }
 
     #[Test]
